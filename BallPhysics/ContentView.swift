@@ -18,28 +18,45 @@ var balls: [Ball] = {
     return bs
 }()
 
+var timesPrintedBounds: Int = 0
+
 struct ContentView: View {
     @StateObject var physicsWorld = PhysicsWorld2D(balls: balls)
+    @State var windowBounds: CGRect = .zero
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                ForEach(physicsWorld.balls, id: \.self) { ball in
-                    Circle()
-                        .fill(.blue)
-                        .frame(width: 10)
-                        .position(ball.position)
+        GroupBox {
+            GeometryReader { geometry in
+                ZStack {
+                    ForEach(physicsWorld.balls, id: \.self) { ball in
+                        Circle()
+                            .fill(.blue)
+                            .frame(width: 10, height: 10)
+                            .position(ball.position)
+                    }
+                }
+                .onChange(of: geometry.size) { oldSize, newSize in
+                    print("Window size changed, old: \(oldSize), new: \(newSize)")
+                    windowBounds.size = newSize
+                }
+                .onAppear() {
+                    if windowBounds == .zero {
+                        windowBounds = CGRect(origin: .zero, size: geometry.size)
+                    }
+                    
+                    Timer.scheduledTimer(withTimeInterval: 0.016, repeats: true) { dt in
+                        if timesPrintedBounds < 2 {
+                            print("Bounds: \(windowBounds)")
+                            timesPrintedBounds += 1
+                        }
+                        physicsWorld.update(deltaTime: dt.timeInterval,
+                                            bounds: windowBounds)
+                    }
                 }
             }
-            .padding()
-            .onAppear() {
-                let boundsSize = geometry.size
-                Timer.scheduledTimer(withTimeInterval: 0.016, repeats: true) { dt in
-                    physicsWorld.update(deltaTime: dt.timeInterval,
-                                        bounds: CGRect(origin: .zero,
-                                                       size: boundsSize))
-                }
-            }
+            .background(.white)
+            .border(.red)
+            .padding(5)
         }
     }
 }

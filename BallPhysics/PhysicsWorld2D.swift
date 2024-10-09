@@ -56,11 +56,12 @@ class PhysicsWorld2D: ObservableObject {
             var ballVelo = CGVector(dx: balls[i].velocity.dx,
                                     dy: balls[i].velocity.dy + Self.gravity)
             
-            let ballPos = CGPoint(x: balls[i].position.x + ballVelo.dx * deltaTime,
+            var ballPos = CGPoint(x: balls[i].position.x + ballVelo.dx * deltaTime,
                                   y: balls[i].position.y + ballVelo.dy * deltaTime)
             
             if ballPos.y >= bounds.height || ballPos.y <= 0 {
                 ballVelo.dy *= -1
+                ballPos.y = ballPos.y >= bounds.height ? bounds.height : 0
             }
             
             balls[i].setVelocity(ballVelo)
@@ -77,12 +78,12 @@ class PhysicsWorld2D: ObservableObject {
                     
                     if getDistance(bi.position, bj.position) <= bi.radius + bj.radius {
                         let collisionVector = getCollisionVector(bi.position, bj.position)
+                        let biVelo = bi.velocity - collisionVector
+                        let bjVelo = bj.velocity + collisionVector
 //                        let biVelo = bi.velocity - collisionVector * 10
 //                        let bjVelo = bj.velocity + collisionVector * 10
-                        let biVelo = bi.velocity - collisionVector * 2
-                        let bjVelo = bj.velocity + collisionVector * 2
-//                        let biVelo = -collisionVector
-//                        let bjVelo = collisionVector
+//                        let biVelo = bi.velocity - collisionVector * 2
+//                        let bjVelo = bj.velocity + collisionVector * 2
                         let biPos = CGPoint(x: bi.position.x + biVelo.dx * deltaTime,
                                             y: bi.position.y + biVelo.dy * deltaTime)
                         let bjPos = CGPoint(x: bj.position.x + bjVelo.dx * deltaTime,
@@ -98,17 +99,25 @@ class PhysicsWorld2D: ObservableObject {
             }
         }
         
+        checkBallsInBoundary(bounds: bounds)
+    }
+    
+    private func checkBallsInBoundary(bounds: CGRect) {
         for i in 0..<balls.count {
             if (balls[i].position.y >= bounds.height && balls[i].velocity.dy > 0) ||
                 (balls[i].position.y <= 0 && balls[i].velocity.dy <= 0) {
                 balls[i].setVelocity(CGVector(dx: balls[i].velocity.dx,
                                               dy: -balls[i].velocity.dy))
+                balls[i].setPosition(CGPoint(x: balls[i].position.x,
+                                             y: balls[i].position.y >= bounds.height ? bounds.height : 0))
             }
             
             if (balls[i].position.x >= bounds.width && balls[i].velocity.dx > 0) ||
                 (balls[i].position.x <= 0 && balls[i].velocity.dx <= 0) {
                 balls[i].setVelocity(CGVector(dx: -balls[i].velocity.dx,
                                               dy: balls[i].velocity.dy))
+                balls[i].setPosition(CGPoint(x: balls[i].position.x >= bounds.width ? bounds.width : 0,
+                                             y: balls[i].position.y))
             }
         }
     }
