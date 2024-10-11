@@ -7,11 +7,14 @@
 
 import SwiftUI
 
+let numBalls = 50
+let ballSize: CGFloat = 15
+
 var balls: [Ball] = {
     var bs = [Ball]()
-    for _ in 0..<50 {
+    for _ in 0..<numBalls {
         let x = CGFloat.random(in: 0..<500)
-        let y: CGFloat = .zero
+        let y: CGFloat = 1.0
         let position = CGPoint(x: x, y: y)
         bs.append(Ball(position: position, radius: 10))
     }
@@ -29,9 +32,10 @@ struct ContentView: View {
             GeometryReader { geometry in
                 ZStack {
                     ForEach(physicsWorld.balls, id: \.self) { ball in
+                        let ballVelo = (ball.velocity.normalize(to: 1000).magnitude / 1000)
                         Circle()
-                            .fill(.blue)
-                            .frame(width: 10, height: 10)
+                            .fill(Color(hue: ballVelo, saturation: 1.0, brightness: 1.0, opacity: 1.0))
+                            .frame(width: ballSize, height: ballSize)
                             .position(ball.position)
                     }
                 }
@@ -54,7 +58,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .background(.white)
+            .background(Color.gray)
             .border(.red)
             .padding(5)
         }
