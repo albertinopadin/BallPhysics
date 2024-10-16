@@ -6,55 +6,62 @@
 //
 
 import CoreGraphics
-import MetalKit
+
+extension CGPoint {
+    static func +(lhs: CGPoint, rhs: CGVector) -> CGPoint {
+        return CGPoint(x: lhs.x + rhs.dx, y: lhs.y + rhs.dy)
+    }
+}
 
 class VerletMethod: IntegrationMethod {
-    static func updateGravity(deltaTime: CGFloat, gravity: CGFloat, bounds: CGRect, balls: inout [Ball]) {
+    static func step(deltaTime: CGFloat, gravity: CGFloat, scale: CGFloat, balls: inout [Ball]) {
         for i in 0..<balls.count {
-            let prevBallPos = balls[i].position
-            let prevBallVelo = balls[i].velocity
-            let prevBallAcc = balls[i].acceleration
+            balls[i].setAcceleration(.zero)
+        }
+        
+        Self.resolveCollisions(deltaTime: deltaTime, scale: scale, balls: &balls)
+        
+        for i in 0..<balls.count {
+            let ballPos = balls[i].position
+            let ballVelo = balls[i].velocity
+            let ballAcc = balls[i].acceleration
             
-            let ballPos = CGPoint(x: prevBallPos.x + prevBallVelo.dx * deltaTime + prevBallAcc.dx * (deltaTime * deltaTime * 0.5),
-                                  y: prevBallPos.y + prevBallVelo.dy * deltaTime + prevBallAcc.dy * (deltaTime * deltaTime * 0.5))
+            let nBallPosEuler: CGPoint = ballPos + ballVelo * deltaTime
+            let nBallPos: CGPoint = nBallPosEuler + 0.5 * ballAcc * (deltaTime * deltaTime)
             
-            let ballAcc = CGVector(dx: prevBallAcc.dx,
-                                   dy: prevBallAcc.dy + gravity)
+            let veloDtHalf = ballVelo + 0.5 * ballAcc * deltaTime
             
-            let ballVelo = CGVector(dx: prevBallVelo.dx + (prevBallAcc.dx + ballAcc.dx)*(deltaTime*0.5),
-                                    dy: prevBallVelo.dy + (prevBallAcc.dy + ballAcc.dy)*(deltaTime*0.5))
+            let newAcc = ballAcc + Self.applyForces(gravity: gravity, scale: scale)
             
-            balls[i].setPosition(ballPos)
-            balls[i].setVelocity(ballVelo)
-            balls[i].setAcceleration(ballAcc)
+            let nBallVelo = veloDtHalf + 0.5 * newAcc * deltaTime
+            
+            
+            balls[i].setPosition(nBallPos)
+            balls[i].setVelocity(nBallVelo)
+            balls[i].setAcceleration(.zero)
         }
     }
     
-    static func updateCollisions(deltaTime: CGFloat, bounds: CGRect, balls: inout [Ball]) {
+    static func applyForces(gravity: CGFloat, scale: CGFloat) -> CGVector {
+        return CGVector(dx: 0, dy: gravity * scale)
+    }
+    
+    static func resolveCollisions(deltaTime: CGFloat, scale: CGFloat, balls: inout [Ball]) {
         for i in 0..<balls.count {
             for j in 0..<balls.count {
                 if i != j {
                     let bi = balls[i]
                     let bj = balls[j]
                     
-                    if PhysicsWorld2D.getDistance(bi.position, bj.position) <= bi.radius + bj.radius {
+                    if PhysicsWorld2D.collided(ballA: bi, ballB: bj) {
                         let collisionVector = PhysicsWorld2D.getCollisionVector(bi.position, bj.position)
-                        let biAcc = bi.acceleration - collisionVector
-                        let bjAcc = bj.acceleration + collisionVector
-                        let biVelo = bi.velocity + (bi.acceleration + biAcc)*(deltaTime * 0.5)
-                        let bjVelo = bj.velocity + (bj.acceleration + bjAcc)*(deltaTime * 0.5)
-                        let biPos = CGPoint(x: bi.position.x + biVelo.dx * deltaTime + biAcc.dx * (deltaTime * deltaTime * 0.5),
-                                            y: bi.position.y + biVelo.dy * deltaTime + biAcc.dy * (deltaTime * deltaTime * 0.5))
-                        let bjPos = CGPoint(x: bj.position.x + bjVelo.dx * deltaTime + bjAcc.dx * (deltaTime * deltaTime * 0.5),
-                                            y: bj.position.y + bjVelo.dy * deltaTime + bjAcc.dy * (deltaTime * deltaTime * 0.5))
+//                        let biAcc = bi.acceleration + collisionVector * (scale / CGFloat(10))
+//                        let bjAcc = bj.acceleration - collisionVector * (scale / CGFloat(10))
+                        let biAcc = bi.acceleration + collisionVector * scale * bi.restitution
+                        let bjAcc = bj.acceleration - collisionVector * scale * bj.restitution
                         
-                        balls[i].setPosition(biPos)
-                        balls[i].setVelocity(biVelo)
                         balls[i].setAcceleration(biAcc)
-                        
-                        balls[j].setPosition(bjPos)
-                        balls[j].setVelocity(bjVelo)
-                        balls[i].setAcceleration(bjAcc)
+                        balls[j].setAcceleration(bjAcc)
                     }
                 }
             }

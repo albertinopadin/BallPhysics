@@ -24,6 +24,14 @@ extension CGVector {
         return CGVector(dx: lhs.dx * CGFloat(rhs), dy: lhs.dy * CGFloat(rhs))
     }
     
+    static func *(lhs: Int, rhs: CGVector) -> CGVector {
+        return CGVector(dx: CGFloat(lhs) * rhs.dx, dy: CGFloat(lhs) * rhs.dy)
+    }
+    
+    static func *(lhs: Double, rhs: CGVector) -> CGVector {
+        return CGVector(dx: CGFloat(lhs) * rhs.dx, dy: CGFloat(lhs) * rhs.dy)
+    }
+    
     static func *(lhs: CGVector, rhs: Double) -> CGVector {
         return CGVector(dx: lhs.dx * CGFloat(rhs), dy: lhs.dy * CGFloat(rhs))
     }

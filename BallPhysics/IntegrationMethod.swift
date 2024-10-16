@@ -8,6 +8,5 @@
 import CoreGraphics
 
 protocol IntegrationMethod {
-    static func updateGravity(deltaTime: CGFloat, gravity: CGFloat, bounds: CGRect, balls: inout [Ball])
-    static func updateCollisions(deltaTime: CGFloat, bounds: CGRect, balls: inout [Ball])
+    static func step(deltaTime: CGFloat, gravity: CGFloat, scale: CGFloat, balls: inout [Ball])
 }
