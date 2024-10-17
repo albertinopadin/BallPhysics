@@ -28,16 +28,16 @@ let colors: [Color] = [
     .yellow
 ]
 
-let numBalls = 10
+let numBalls = 100
 let ballSize: CGFloat = 15
 
 var balls: [Ball] = {
     var bs = [Ball]()
     for _ in 0..<numBalls {
-        let x = CGFloat.random(in: 0..<500)
+        let x = CGFloat.random(in: 0..<1000)
         let y = CGFloat.random(in: 20...100)
         let position = CGPoint(x: x, y: y)
-        bs.append(Ball(position: position, radius: 10, color: colors.randomElement()!))
+        bs.append(Ball(mass: 1.0, position: position, radius: 10, color: colors.randomElement()!))
     }
     return bs
 }()

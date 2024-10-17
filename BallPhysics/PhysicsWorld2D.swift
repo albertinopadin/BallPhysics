@@ -12,15 +12,17 @@ public typealias float2 = SIMD2<Float>
 
 class PhysicsWorld2D: ObservableObject {
     public static let gravity: CGFloat = 9.8  // Down direction is Positive
-    public static let restitution: CGFloat = 0.80
+    public static let boundRestitution: CGFloat = 0.80
     
     @Published var counter: UInt64 = 0
     
 //    @Published var balls: [Ball]
     var balls: [Ball]
     
-//    let physics: IntegrationMethod.Type = EulerMethod.self
-    let physics: IntegrationMethod.Type = VerletMethod.self
+    let eulerPhysics = EulerMethod.self
+    let verletPhysics = VerletMethod.self
+    
+    let collisionResponse = HeckerCollisionResponse.self
     
     var totalTime: CGFloat = 0
     var gotOneSec: Bool = false
@@ -30,9 +32,22 @@ class PhysicsWorld2D: ObservableObject {
     }
     
     public func update(deltaTime: CGFloat, bounds: CGRect, scale: CGFloat) {
-        physics.step(deltaTime: deltaTime, gravity: Self.gravity, scale: scale, balls: &balls)
-        checkBallsInBoundary(bounds: bounds)
+//        naiveUpdate(deltaTime: deltaTime, bounds: bounds, scale: scale)
+        verletHeckerUpdate(deltaTime: deltaTime, bounds: bounds, scale: scale)
+        
         counter += 1
+    }
+    
+    private func naiveUpdate(deltaTime: CGFloat, bounds: CGRect, scale: CGFloat) {
+        eulerPhysics.step(deltaTime: deltaTime, gravity: Self.gravity, scale: scale, balls: &balls)
+        checkBallsInBoundary(bounds: bounds)
+        dampen()
+    }
+    
+    private func verletHeckerUpdate(deltaTime: CGFloat, bounds: CGRect, scale: CGFloat) {
+        collisionResponse.resolveCollisions(deltaTime: deltaTime, scale: scale, balls: &balls)
+        verletPhysics.step(deltaTime: deltaTime, gravity: Self.gravity, scale: scale, balls: &balls)
+        collisionResponse.resolveBoundary(bounds: bounds, boundRestitution: Self.boundRestitution, balls: &balls)
     }
     
     private func checkBallsInBoundary(bounds: CGRect) {
@@ -41,23 +56,36 @@ class PhysicsWorld2D: ObservableObject {
             let ballRadius = balls[i].radius
             
             if ((ballPos.y + ballRadius) >= bounds.height && balls[i].velocity.dy > 0) ||
-                ((ballPos.y + ballRadius) <= 0 && balls[i].velocity.dy <= 0) {
-                balls[i].setAcceleration(CGVector(dx: balls[i].acceleration.dx,
-                                                  dy: 0))
-                balls[i].setVelocity(CGVector(dx: balls[i].velocity.dx,
-                                              dy: -balls[i].velocity.dy * Self.restitution))
-                balls[i].setPosition(CGPoint(x: ballPos.x,
-                                             y: ballPos.y + ballRadius >= bounds.height ? bounds.height - ballRadius : ballRadius))
+                ((ballPos.y - ballRadius) <= 0 && balls[i].velocity.dy <= 0) {
+                balls[i].acceleration = CGVector(dx: balls[i].acceleration.dx,
+                                                 dy: 0)
+                balls[i].velocity = CGVector(dx: balls[i].velocity.dx,
+                                             dy: -balls[i].velocity.dy * Self.boundRestitution)
+                balls[i].position = CGPoint(x: ballPos.x,
+                                            y: ballPos.y + ballRadius >= bounds.height ? bounds.height - ballRadius : ballRadius)
             }
             
             if (ballPos.x + ballRadius >= bounds.width && balls[i].velocity.dx > 0) ||
                 (ballPos.x - ballRadius <= 0 && balls[i].velocity.dx <= 0) {
-                balls[i].setAcceleration(CGVector(dx: 0,
-                                                  dy: balls[i].acceleration.dy))
-                balls[i].setVelocity(CGVector(dx: -balls[i].velocity.dx * Self.restitution,
-                                              dy: balls[i].velocity.dy))
-                balls[i].setPosition(CGPoint(x: ballPos.x + ballRadius >= bounds.width ? bounds.width - ballRadius : ballRadius,
-                                             y: ballPos.y))
+                balls[i].acceleration = CGVector(dx: 0,
+                                                 dy: balls[i].acceleration.dy)
+                balls[i].velocity = CGVector(dx: -balls[i].velocity.dx * Self.boundRestitution,
+                                             dy: balls[i].velocity.dy)
+                balls[i].position = CGPoint(x: ballPos.x + ballRadius >= bounds.width ? bounds.width - ballRadius : ballRadius,
+                                            y: ballPos.y)
+                
+            }
+        }
+    }
+    
+    private func dampen() {
+        for i in 0..<balls.count {
+            let ballVeloMag = balls[i].velocity.magnitude
+            
+            if ballVeloMag < 1.0 {
+                print("Ball velo mag under threshold: \(ballVeloMag)")
+                balls[i].acceleration = .zero
+                balls[i].velocity = .zero
             }
         }
     }

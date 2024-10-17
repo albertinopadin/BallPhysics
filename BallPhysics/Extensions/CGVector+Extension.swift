@@ -6,8 +6,17 @@
 //
 
 import CoreGraphics
+import simd
 
 extension CGVector {
+    static func +=(lhs: inout CGVector, rhs: CGVector) {
+        lhs = CGVector(dx: lhs.dx + rhs.dx, dy: lhs.dy + rhs.dy)
+    }
+    
+    static func -=(lhs: inout CGVector, rhs: CGVector) {
+        lhs = CGVector(dx: lhs.dx - rhs.dx, dy: lhs.dy - rhs.dy)
+    }
+    
     static func -(lhs: CGVector, rhs: CGVector) -> CGVector {
         return CGVector(dx: lhs.dx - rhs.dx, dy: lhs.dy - rhs.dy)
     }
@@ -36,6 +45,10 @@ extension CGVector {
         return CGVector(dx: lhs.dx * CGFloat(rhs), dy: lhs.dy * CGFloat(rhs))
     }
     
+    static func /(lhs: CGVector, rhs: Double) -> CGVector {
+        return CGVector(dx: lhs.dx / CGFloat(rhs), dy: lhs.dy / CGFloat(rhs))
+    }
+    
     static prefix func -(v: CGVector) -> CGVector {
         return CGVector(dx: -v.dx, dy: -v.dy)
     }
@@ -53,5 +66,9 @@ extension CGVector {
         } else {
             return self
         }
+    }
+    
+    func toSIMD() -> SIMD2<Float> {
+        return [Float(self.dx), Float(self.dy)]
     }
 }

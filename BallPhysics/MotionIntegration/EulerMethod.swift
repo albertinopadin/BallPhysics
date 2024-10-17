@@ -19,7 +19,7 @@ final class EulerMethod: IntegrationMethod {
             let ballVelo = CGVector(dx: balls[i].velocity.dx,
                                     dy: balls[i].velocity.dy + scale * gravity * deltaTime)
             
-            balls[i].setVelocity(ballVelo)
+            balls[i].velocity = ballVelo
         }
     }
     
@@ -35,8 +35,8 @@ final class EulerMethod: IntegrationMethod {
                         let biVelo = bi.velocity + collisionVector * (scale / CGFloat(100))
                         let bjVelo = bj.velocity - collisionVector * (scale / CGFloat(100))
                         
-                        balls[i].setVelocity(biVelo)
-                        balls[j].setVelocity(bjVelo)
+                        balls[i].velocity = biVelo
+                        balls[j].velocity = bjVelo
                     }
                 }
             }
@@ -48,7 +48,7 @@ final class EulerMethod: IntegrationMethod {
             let ballPos = CGPoint(x: balls[i].position.x + balls[i].velocity.dx * deltaTime,
                                   y: balls[i].position.y + balls[i].velocity.dy * deltaTime)
             
-            balls[i].setPosition(ballPos)
+            balls[i].position = ballPos
         }
     }
 }
