@@ -7,27 +7,6 @@
 
 import SwiftUI
 
-let colors: [Color] = [
-    .accentColor,
-    .blue,
-    .black,
-    .brown,
-    .cyan,
-    .gray,
-    .green,
-    .indigo,
-    .mint,
-    .orange,
-    .pink,
-    .purple,
-    .primary,
-    .red,
-    .secondary,
-    .teal,
-    .white,
-    .yellow
-]
-
 let numBalls = 100
 let ballSize: CGFloat = 15
 
@@ -58,9 +37,13 @@ struct ContentView: View {
     @State var windowBounds: CGRect = .zero
     
     var body: some View {
-        SUIRendered2DView(physicsWorld: physicsWorld,
-                          windowBounds: windowBounds,
-                          displayScale: displayScale)
+//        SUIRendered2DView(physicsWorld: physicsWorld,
+//                          windowBounds: windowBounds,
+//                          displayScale: displayScale)
+        
+        CanvasRendered2DView(physicsWorld: physicsWorld,
+                             windowBounds: windowBounds,
+                             displayScale: displayScale)
     }
 }
 
