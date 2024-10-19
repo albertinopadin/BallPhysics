@@ -35,8 +35,11 @@ final class HeckerCollisionResponse {
                         var j = -(1 + e) * CGFloat(dot(relativeVelo.toSIMD(), collisionNormal.toSIMD()))
                         j /= ((1.0 / ballA.mass) + (1.0 / ballB.mass))
                         
-                        balls[a].velocity += j / ballA.mass * collisionNormal
-                        balls[b].velocity -= j / ballB.mass * collisionNormal
+                        let ballADeltaVelo = j / ballA.mass * collisionNormal
+                        let ballBDeltaVelo = j / ballB.mass * collisionNormal
+                        
+                        balls[a].velocity += ballADeltaVelo.magnitude > 1.0 ? ballADeltaVelo : .zero
+                        balls[b].velocity -= ballBDeltaVelo.magnitude > 1.0 ? ballBDeltaVelo : .zero
                     }
                 }
             }

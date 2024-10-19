@@ -1,5 +1,5 @@
 //
-//  VerletMethod.swift
+//  VerletSolver.swift
 //  BallPhysics
 //
 //  Created by Albertino Padin on 10/11/24.
@@ -7,7 +7,7 @@
 
 import CoreGraphics
 
-class VerletMethod: IntegrationMethod {
+class VerletSolver: MotionSolver {
     static func step(deltaTime: CGFloat, gravity: CGFloat, scale: CGFloat, balls: inout [Ball]) {
         for i in 0..<balls.count {
             balls[i].acceleration = .zero
@@ -29,7 +29,8 @@ class VerletMethod: IntegrationMethod {
             
             balls[i].position = nBallPos
             balls[i].velocity = nBallVelo
-            balls[i].acceleration = .zero
+//            balls[i].acceleration = .zero
+            balls[i].acceleration = newAcc
         }
     }
     

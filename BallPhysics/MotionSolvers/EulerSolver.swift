@@ -1,5 +1,5 @@
 //
-//  EulerMethod.swift
+//  EulerSolver.swift
 //  BallPhysics
 //
 //  Created by Albertino Padin on 10/10/24.
@@ -7,7 +7,7 @@
 
 import CoreGraphics
 
-final class EulerMethod: IntegrationMethod {
+final class EulerSolver: MotionSolver {
     static func step(deltaTime: CGFloat, gravity: CGFloat, scale: CGFloat, balls: inout [Ball]) {
         Self.applyGravity(deltaTime: deltaTime, gravity: gravity, scale: scale, balls: &balls)
         Self.resolveCollisions(deltaTime: deltaTime, scale: scale, balls: &balls)

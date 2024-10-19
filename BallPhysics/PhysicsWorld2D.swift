@@ -19,8 +19,8 @@ class PhysicsWorld2D: ObservableObject {
 //    @Published var balls: [Ball]
     var balls: [Ball]
     
-    let eulerPhysics = EulerMethod.self
-    let verletPhysics = VerletMethod.self
+    let eulerPhysics = EulerSolver.self
+    let verletPhysics = VerletSolver.self
     
     let collisionResponse = HeckerCollisionResponse.self
     
@@ -34,6 +34,7 @@ class PhysicsWorld2D: ObservableObject {
     public func update(deltaTime: CGFloat, bounds: CGRect, scale: CGFloat) {
 //        naiveUpdate(deltaTime: deltaTime, bounds: bounds, scale: scale)
         verletHeckerUpdate(deltaTime: deltaTime, bounds: bounds, scale: scale)
+//        dampen()
         
         counter += 1
     }
