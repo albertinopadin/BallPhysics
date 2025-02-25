@@ -53,7 +53,7 @@ struct CanvasRendered2DView: View {
             }
             .background(Color.gray)
             .border(.red)
-            .padding(5)
+            .padding(10)
         }
     }
 }

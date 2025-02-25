@@ -10,6 +10,11 @@ import CoreGraphics
 
 public typealias float2 = SIMD2<Float>
 
+enum UpdateType {
+    case NaiveEuler
+    case HeckerVerlet
+}
+
 class PhysicsWorld2D: ObservableObject {
     public static let gravity: CGFloat = 9.8  // Down direction is Positive
     public static let boundRestitution: CGFloat = 0.80
@@ -18,6 +23,7 @@ class PhysicsWorld2D: ObservableObject {
     
 //    @Published var balls: [Ball]
     var balls: [Ball]
+    var updateType: UpdateType
     
     let eulerPhysics = EulerSolver.self
     let verletPhysics = VerletSolver.self
@@ -27,14 +33,20 @@ class PhysicsWorld2D: ObservableObject {
     var totalTime: CGFloat = 0
     var gotOneSec: Bool = false
     
-    init(balls: [Ball]) {
+    init(balls: [Ball], updateType: UpdateType = .NaiveEuler) {
         self.balls = balls
+        self.updateType = updateType
     }
     
     public func update(deltaTime: CGFloat, bounds: CGRect, scale: CGFloat) {
-//        naiveUpdate(deltaTime: deltaTime, bounds: bounds, scale: scale)
-        verletHeckerUpdate(deltaTime: deltaTime, bounds: bounds, scale: scale)
-//        dampen()
+        switch self.updateType {
+                
+            case .NaiveEuler:
+                naiveUpdate(deltaTime: deltaTime, bounds: bounds, scale: scale)
+                
+            case .HeckerVerlet:
+                heckerVerletUpdate(deltaTime: deltaTime, bounds: bounds, scale: scale)
+        }
         
         counter += 1
     }
@@ -45,7 +57,7 @@ class PhysicsWorld2D: ObservableObject {
         dampen()
     }
     
-    private func verletHeckerUpdate(deltaTime: CGFloat, bounds: CGRect, scale: CGFloat) {
+    private func heckerVerletUpdate(deltaTime: CGFloat, bounds: CGRect, scale: CGFloat) {
         collisionResponse.resolveCollisions(deltaTime: deltaTime, scale: scale, balls: &balls)
         verletPhysics.step(deltaTime: deltaTime, gravity: Self.gravity, scale: scale, balls: &balls)
         collisionResponse.resolveBoundary(bounds: bounds, boundRestitution: Self.boundRestitution, balls: &balls)

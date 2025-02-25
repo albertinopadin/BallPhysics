@@ -72,7 +72,7 @@ final class HeckerCollisionResponse {
                 balls[i].velocity += newVelo
                 
                 balls[i].position = CGPoint(x: ballPos.x,
-                                            y: ballPos.y + ballRadius >= bounds.height ? bounds.height - ballRadius : ballRadius)
+                                            y: hitFloor ? bounds.height - ballRadius : ballRadius)
             }
             
             if (hitRightWall && balls[i].velocity.dx > 0) || (hitLeftWall && balls[i].velocity.dx <= 0) {
@@ -87,7 +87,7 @@ final class HeckerCollisionResponse {
                 let newVelo = j / ballMass * CGVector(dx: CGFloat(boundVector.x), dy: CGFloat(boundVector.y))
                 balls[i].velocity += newVelo
                 
-                balls[i].position = CGPoint(x: ballPos.x + ballRadius >= bounds.width ? bounds.width - ballRadius : ballRadius,
+                balls[i].position = CGPoint(x: hitRightWall ? bounds.width - ballRadius : ballRadius,
                                             y: ballPos.y)
                 
             }

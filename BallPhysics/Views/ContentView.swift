@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-let numBalls = 100
+let numBalls = 5
 let ballSize: CGFloat = 15
 
 var balls: [Ball] = {
@@ -33,7 +33,8 @@ let pointsPerMeter = pointsPerInch * inchesPerMeter
 struct ContentView: View {
     @Environment(\.displayScale) var displayScale
     
-    @StateObject var physicsWorld = PhysicsWorld2D(balls: balls)
+    @StateObject var physicsWorld = PhysicsWorld2D(balls: balls,
+                                                   updateType: .HeckerVerlet)
     @State var windowBounds: CGRect = .zero
     
     var body: some View {
